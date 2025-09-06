@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SafeHelmet+ • Safety Companion</title>
+  <meta name="description" content="A single‑file prototype UI for a smart helmet and safety companion app." />
+  <meta name="theme-color" content="#0d9488" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Cpath fill='%230d9488' d='M64 6c32 0 58 26 58 58s-26 58-58 58S6 96 6 64 32 6 64 6z'/%3E%3Cpath fill='white' d='M83 44c-5-11-16-17-26-17-14 0-28 11-30 25-3 16 4 29 18 34 5 2 7 3 19 3h21c6 0 10-3 12-8l3-7c2-5-1-10-6-11l-15-4c-3-1-6 1-7 4l-3 8c-1 3-4 5-7 5H49c-4 0-7-3-7-7 0-4 3-7 7-7h10c3 0 6-2 7-5l3-8c2-4 7-6 11-4l12 3c-1-2-2-4-3-6z'/%3E%3C/svg%3E" />
+  <style>
+    :root{
+      --bg:#0b1020; --surface:#0f172a; --muted:#94a3b8; --text:#e2e8f0; --brand:#0d9488; --brand-2:#22d3ee; --danger:#ef4444; --ok:#22c55e; --card:#111827; --ring:rgba(34,211,238,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background:linear-gradient(120deg,#0b1020,#0b1020 60%,#031225); color:var(--text)}
+    a{color:var(--brand)}
+    .container{max-width:1100px;margin:0 auto;padding:24px}
+    header{position:sticky;top:0;background:rgba(11,16,32,.75);backdrop-filter: blur(8px);border-bottom:1px solid #1f2937;z-index:10}
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.3px}
+    .brand .logo{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background: radial-gradient(100% 100% at 50% 0%, var(--brand-2), var(--brand)); box-shadow: 0 10px 30px rgba(34,211,238,.15)}
+    .brand span{font-size:1.1rem}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #1f2937;border-radius:999px;background:linear-gradient(120deg,#0f172a,#0b1324)}
+    .grid{display:grid;gap:16px}
+    @media(min-width:900px){.grid.cols-3{grid-template-columns:repeat(3,1fr)}.grid.cols-2{grid-template-columns:repeat(2,1fr)}}
+    .card{background:linear-gradient(180deg,#0f172a,#0b1324); border:1px solid #1f2937; border-radius:18px; padding:18px; box-shadow: 0 10px 30px rgba(2,6,23,.35)}
+    .card h3{margin:.2rem 0 .6rem;font-size:1.05rem}
+    .muted{color:var(--muted)}
+    .hero{display:grid;gap:22px;align-items:center;margin:18px 0 24px}
+    @media(min-width:900px){.hero{grid-template-columns:1.2fr .8fr}}
+    .title{font-size: clamp(1.6rem, 2.8vw + .8rem, 2.6rem); line-height:1.15; margin:8px 0}
+    .subtitle{color:#cbd5e1; font-size: clamp(.95rem, .6vw + .75rem, 1.05rem)}
+    .cta-row{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{cursor:pointer; border:none; padding:12px 16px; border-radius:12px; font-weight:700; letter-spacing:.2px; display:inline-flex; align-items:center; gap:10px}
+    .btn.primary{background:linear-gradient(120deg,var(--brand),var(--brand-2)); color:#001b1a; box-shadow:0 10px 25px var(--ring)}
+    .btn.ghost{background:transparent; color:var(--text); border:1px solid #1f2937}
+    .kpi{display:flex; align-items:center; gap:12px}
+    .kpi .dot{width:10px;height:10px;border-radius:50%}
+    .kpi .value{font-size:1.25rem; font-weight:800}
+    .status-ok{background: radial-gradient(100% 100% at 50% 0%, #34d399,#16a34a)}
+    .status-warn{background: radial-gradient(100% 100% at 50% 0%, #f43f5e,#ef4444)}
+    .phone{aspect-ratio:9/19; border:1px solid #1f2937; border-radius:28px; padding:12px; background:linear-gradient(180deg,#0a0f1d,#0b1120); position:relative; overflow:hidden}
+    .notch{position:absolute; left:50%; top:0; transform:translateX(-50%); height:24px; width:150px; background:#0C1224; border-radius:0 0 16px 16px}
+    .screen{border-radius:20px; border:1px solid #111827; height:100%; padding:14px; display:grid; gap:12px}
+    .row{display:flex; gap:12px; align-items:center}
+    .tile{flex:1; padding:12px; border:1px solid #1f2937; border-radius:14px; background:linear-gradient(180deg,#0d1427,#0b1324)}
+    .tile h4{margin:.1rem 0 .4rem; font-size:.95rem}
+    .tile .big{font-size:1.35rem;font-weight:800}
+    .switch{position:relative; width:54px; height:30px; background:#111827; border-radius:999px; border:1px solid #1f2937}
+    .switch input{appearance:none; width:100%; height:100%; margin:0}
+    .thumb{position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%; background:linear-gradient(180deg,#1f2937,#0b1324); transition:.2s}
+    .switch.on{background:linear-gradient(120deg,var(--brand),var(--brand-2)); border-color:transparent}
+    .switch.on .thumb{left:27px; background:#001b1a}
+    .list{display:grid;gap:10px; max-height:220px; overflow:auto}
+    .list-item{display:flex; justify-content:space-between; gap:12px; align-items:center; font-size:.95rem; border:1px solid #1f2937; padding:10px 12px; border-radius:12px; background:#0a1222}
+    .badge{font-size:.72rem; padding:4px 8px; border-radius:999px; background:#0b1324; border:1px solid #1f2937}
+
+    dialog{background:linear-gradient(180deg,#0f172a,#0b1324); color:var(--text); border:1px solid #1f2937; border-radius:16px; padding:0; max-width:520px}
+    dialog::backdrop{background:rgba(2,6,23,.6)}
+    .modal-head{padding:14px 16px; border-bottom:1px solid #1f2937; display:flex; justify-content:space-between; align-items:center}
+    .modal-body{padding:16px; display:grid; gap:12px}
+
+    .footer{margin:28px 0 6px; color:#94a3b8; font-size:.9rem; display:flex; align-items:center; justify-content:space-between}
+    .footer small{opacity:.9}
+    .tooltip{position:relative}
+    .tooltip:hover .tip{opacity:1; transform:translate(-50%,-6px)}
+    .tip{position:absolute; left:50%; bottom:120%; transform:translate(-50%,0); opacity:0; transition:.2s; pointer-events:none; white-space:nowrap; background:#0b1324; border:1px solid #1f2937; padding:6px 8px; border-radius:8px; font-size:.8rem; color:#cbd5e1}
+    .qr{width:100px; height:100px; background:repeating-conic-gradient(from 45deg, #0b1324 0 10deg, #0f172a 10deg 20deg); border:1px dashed #1f2937; border-radius:10px}
+    .visually-hidden{position:absolute!important; height:1px; width:1px; overflow:hidden; clip:rect(1px,1px,1px,1px); white-space:nowrap}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <div class="brand" aria-label="SafeHelmet+">
+        <div class="logo" aria-hidden="true"></div>
+        <span>SafeHelmet<span style="opacity:.75">+</span></span>
+      </div>
+      <div class="pill" role="status" aria-live="polite">
+        <span class="kpi">
+          <span class="dot status-ok"></span>
+          <span class="muted">Helmet Connected</span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div>
+        <h1 class="title">Ride smarter, ride safer — your smart helmet’s companion app.</h1>
+        <p class="subtitle">Live ride tracking, auto‑crash detection, SOS with countdown & contact sharing, helmet lock status, speed & battery tiles, and a simple trip log — all inside a single HTML file.</p>
+        <div class="cta-row" role="group" aria-label="Primary actions">
+          <button class="btn primary" id="startRideBtn" aria-pressed="false">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            <span>Start Ride</span>
+          </button>
+          <button class="btn ghost" id="sosBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 14h-2v-2h2v2zm0-4h-2V6h2v6z"/></svg>
+            Emergency SOS
+          </button>
+          <button class="btn ghost" id="settingsBtn" aria-haspopup="dialog" aria-controls="settingsDialog">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.14 12.94a7.99 7.99 0 000-1.88l2.03-1.58a.5.5 0 00.12-.66l-1.92-3.32a.5.5 0 00-.61-.22l-2.39.96a7.97 7.97 0 00-1.63-.95l-.36-2.54A.5.5 0 0013.88 0h-3.76a.5.5 0 00-.49.42l-.36 2.54c-.58.23-1.12.54-1.63.95l-2.39-.96a.5.5 0 00-.61.22L.72 6.84a.5.5 0 00.12.66l2.03 1.58c-.07.62-.07 1.26 0 1.88L.84 12.54a.5.5 0 00-.12.66l1.92 3.32c.12.21.38.3.61.22l2.39-.96c.5.41 1.05.73 1.63.95l.36 2.54c.04.24.25.42.49.42h3.76c.24 0 .45-.18.49-.42l.36-2.54c.58-.23 1.12-.54 1.63-.95l2.39.96c.23.08.49-.01.61-.22l1.92-3.32a.5.5 0 00-.12-.66l-2.03-1.58zM12 16a4 4 0 110-8 4 4 0 010 8z"/></svg>
+            Settings
+          </button>
+        </div>
+      </div>
+
+      <div class="phone card" aria-label="App preview on phone">
+        <div class="notch" aria-hidden="true"></div>
+        <div class="screen">
+          <div class="row">
+            <div class="tile" aria-live="polite">
+              <h4>Helmet Lock</h4>
+              <div class="big" id="lockState">Locked</div>
+              <div class="muted">Tap to toggle</div>
+            </div>
+            <div class="tile">
+              <h4>Speed</h4>
+              <div class="big"><span id="speed">0</span> km/h</div>
+              <div class="muted">Live estimate</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="tile">
+              <h4>Impact Sensor</h4>
+              <div class="big"><span id="impact">Normal</span></div>
+              <div class="muted">Click to simulate</div>
+            </div>
+            <div class="tile">
+              <h4>Battery</h4>
+              <div class="big"><span id="battery">87</span>%</div>
+              <div class="muted">Helmet + Beacon</div>
+            </div>
+          </div>
+          <div class="row" style="align-items:flex-start">
+            <div class="tile" style="flex:1.6">
+              <h4>Trip Log</h4>
+              <div id="tripEmpty" class="muted">No trips yet. Start a ride!</div>
+              <div class="list" id="tripList" aria-live="polite" aria-label="Recent trips"></div>
+            </div>
+            <div class="tile" style="flex:.9">
+              <h4>Companion</h4>
+              <div class="row" style="justify-content:space-between">
+                <div>
+                  <div class="muted">Share code</div>
+                  <div class="big" id="pairCode">— — — —</div>
+                </div>
+                <div class="qr tooltip" aria-label="QR placeholder" role="img">
+                  <span class="tip">Scan in Companion app</span>
+                </div>
+              </div>
+              <div class="row" style="margin-top:10px; justify-content:space-between">
+                <button class="btn ghost" id="pairBtn">Pair</button>
+                <button class="btn primary" id="sosMini">SOS</button>
+              </div>
+              <div class="row" style="margin-top:8px; justify-content:space-between">
+                <span class="muted" id="rideTimer">00:00:00</span>
+                <span class="badge" id="rideDistance">0.00 km</span>
+              </div>
+            </div>
+          </div>
+          <div class="row" style="justify-content:space-between">
+            <div class="switch" id="rideSwitch" role="switch" aria-checked="false" tabindex="0"><span class="thumb"></span></div>
+            <button class="btn ghost" id="impactBtn">Simulate Impact</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid cols-3">
+      <article class="card">
+        <h3>Crash Detection</h3>
+        <p class="muted">Device‑side monitoring for sudden deceleration & tilt. Triggers an SOS countdown with your live location and last 30 seconds of telemetry.</p>
+      </article>
+      <article class="card">
+        <h3>Trusted Contacts</h3>
+        <p class="muted">Pick up to 3 contacts. We’ll notify them with SMS/WhatsApp deeplinks and a secure web view when you trigger SOS.</p>
+      </article>
+      <article class="card">
+        <h3>Helmet Awareness</h3>
+        <p class="muted">Auto‑lock when removed, ride lockout without helmet (optional), and low‑battery reminders for both helmet & beacon.</p>
+      </article>
+    </section>
+
+    <div class="footer">
+      <small>Prototype UI • No backend required • Works offline</small>
+      <small>© SafeHelmet+ 2025</small>
+    </div>
+  </main>
+
+  <!-- Settings Dialog -->
+  <dialog id="settingsDialog" aria-labelledby="settingsTitle">
+    <div class="modal-head">
+      <h3 id="settingsTitle">Settings</h3>
+      <button class="btn ghost" id="closeSettings">Close</button>
+    </div>
+    <form method="dialog" class="modal-body" id="settingsForm">
+      <label>
+        <div class="muted">Rider Name</div>
+        <input name="rider" required placeholder="e.g., Nihitha" style="width:100%;padding:10px;border-radius:10px;border:1px solid #1f2937;background:#0a1222;color:var(--text)"/>
+      </label>
+      <label>
+        <div class="muted">Primary Contact (Phone)</div>
+        <input name="c1" required pattern="[+0-9\-\s]{8,}" placeholder="e.g., +91 98765 43210" style="width:100%;padding:10px;border-radius:10px;border:1px solid #1f2937;background:#0a1222;color:var(--text)"/>
+      </label>
+      <label>
+        <div class="muted">Secondary Contact (Optional)</div>
+        <input name="c2" pattern="[+0-9\-\s]{8,}" placeholder="e.g., +91 9xxxx xxxxx" style="width:100%;padding:10px;border-radius:10px;border:1px solid #1f2937;background:#0a1222;color:var(--text)"/>
+      </label>
+      <label class="row" style="justify-content:space-between">
+        <span class="muted">Helmet Lockout without Helmet</span>
+        <input type="checkbox" name="lockout" />
+      </label>
+      <menu style="display:flex; gap:10px; justify-content:flex-end; margin:6px 0 0">
+        <button class="btn ghost" value="cancel">Cancel</button>
+        <button class="btn primary" value="default">Save</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <!-- SOS Dialog -->
+  <dialog id="sosDialog" aria-labelledby="sosTitle" aria-live="assertive">
+    <div class="modal-head">
+      <h3 id="sosTitle">Emergency SOS</h3>
+      <button class="btn ghost" id="cancelSOS">Cancel</button>
+    </div>
+    <div class="modal-body">
+      <div class="row" style="justify-content:space-between; align-items:center">
+        <div>
+          <div class="muted">Countdown</div>
+          <div class="title" id="sosCountdown" style="margin:0">5</div>
+        </div>
+        <div>
+          <div class="muted">Geo</div>
+          <div id="sosGeo" class="badge">Locating…</div>
+        </div>
+      </div>
+      <p class="muted">If you don’t cancel before the timer ends, we’ll prepare an alert message with your location link and share it to your saved contacts.</p>
+      <div class="row" style="justify-content:flex-end">
+        <button class="btn primary" id="sendNow">Send Now</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    // Utility helpers
+    const $ = (q, el=document) => el.querySelector(q);
+    const $$ = (q, el=document) => [...el.querySelectorAll(q)];
+    const store = {
+      get(key, fallback){ try{ return JSON.parse(localStorage.getItem(key)) ?? fallback }catch{ return fallback } },
+      set(key, val){ localStorage.setItem(key, JSON.stringify(val)) }
+    }
+
+    // UI State
+    let riding = false, rideStart = null, rideTimerInt = null, distanceKm = 0, speed = 0;
+
+    function formatTime(ms){
+      const t = Math.max(0, ms|0); const s = Math.floor(t/1000)%60; const m = Math.floor(t/60000)%60; const h = Math.floor(t/3600000);
+      const pad = n => String(n).padStart(2,'0');
+      return `${pad(h)}:${pad(m)}:${pad(s)}`;
+    }
+
+    function updateTimer(){
+      if(!rideStart){ $('#rideTimer').textContent = '00:00:00'; return }
+      const elapsed = Date.now()-rideStart; $('#rideTimer').textContent = formatTime(elapsed);
+    }
+
+    function updateDistance(add=0){
+      distanceKm = Math.max(0, distanceKm + add);
+      $('#rideDistance').textContent = distanceKm.toFixed(2) + ' km';
+    }
+
+    function randomSpeed(){
+      // Simulated speed profile between 0 and 65
+      const target = riding ? 15 + Math.random()*50 : 0; // target speed
+      speed = Math.round((speed*0.7) + (target*0.3));
+      $('#speed').textContent = speed.toString();
+      // distance update assuming called every second
+      updateDistance(speed/3600);
+    }
+
+    function toggleRide(forced){
+      if(typeof forced === 'boolean') riding = forced; else riding = !riding;
+      $('#rideSwitch').classList.toggle('on', riding);
+      $('#startRideBtn').setAttribute('aria-pressed', riding);
+      $('#startRideBtn').querySelector('span').textContent = riding ? 'Stop Ride' : 'Start Ride';
+      if(riding){ rideStart = Date.now(); rideTimerInt = setInterval(updateTimer, 1000); } else { clearInterval(rideTimerInt); finalizeTrip(); rideStart = null; }
+    }
+
+    function finalizeTrip(){
+      const trips = store.get('trips', []);
+      const trip = { id: Date.now(), at: new Date().toISOString(), distance: distanceKm.toFixed(2), durationMs: $('#rideTimer').textContent };
+      if(distanceKm > 0.05){ trips.unshift(trip); store.set('trips', trips); renderTrips(); }
+      distanceKm = 0; updateDistance(0);
+    }
+
+    function renderTrips(){
+      const trips = store.get('trips', []);
+      const list = $('#tripList'); list.innerHTML = '';
+      $('#tripEmpty').style.display = trips.length ? 'none' : 'block';
+      trips.slice(0, 6).forEach(t => {
+        const li = document.createElement('div'); li.className='list-item';
+        const when = new Date(t.at).toLocaleString();
+        li.innerHTML = `<div><div><strong>${t.distance} km</strong> • ${t.durationMs}</div><div class="muted">${when}</div></div><span class="badge">Save GPX</span>`;
+        li.querySelector('.badge').addEventListener('click', ()=> exportGPX(t));
+        list.appendChild(li);
+      });
+    }
+
+    function exportGPX(t){
+      const gpx = `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="SafeHelmet+" xmlns="http://www.topografix.com/GPX/1/1">\n<trk><name>Trip ${new Date(t.at).toLocaleString()}</name><trkseg>\n<trkpt lat="17.6868" lon="83.2185"><time>${t.at}</time></trkpt>\n</trkseg></trk></gpx>`;
+      const blob = new Blob([gpx], {type:'application/gpx+xml'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = `safehelmet_trip_${t.id}.gpx`; a.click(); URL.revokeObjectURL(url);
+    }
+
+    function geolocate(target){
+      if(!('geolocation' in navigator)){ target.textContent = 'Geo unavailable'; return; }
+      navigator.geolocation.getCurrentPosition(pos=>{
+        const {latitude:lat, longitude:lon} = pos.coords;
+        target.textContent = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+        target.dataset.url = `https://maps.google.com/?q=${lat},${lon}`;
+      }, ()=> target.textContent = 'Location denied');
+    }
+
+    // SOS flow
+    function openSOS(){
+      const dlg = $('#sosDialog'); const c = $('#sosCountdown'); let n = 5; c.textContent = n;
+      geolocate($('#sosGeo'));
+      dlg.showModal();
+      const it = setInterval(()=>{ n--; c.textContent = n; if(n<=0){ clearInterval(it); sendSOS(); dlg.close(); } }, 1000);
+      $('#cancelSOS').onclick = ()=>{ clearInterval(it); dlg.close(); };
+      $('#sendNow').onclick = ()=>{ clearInterval(it); sendSOS(); dlg.close(); };
+    }
+
+    function sendSOS(){
+      const geo = $('#sosGeo');
+      const settings = store.get('settings', {});
+      const txt = encodeURIComponent(`🚨 SOS – SafeHelmet+\nRider: ${settings.rider||'Unknown'}\nLocation: ${geo.dataset.url||'Geo unavailable'}\nTime: ${new Date().toLocaleString()}`);
+      const phone = (settings.c1||'').replace(/\D/g,'');
+      if(phone){
+        // Try WhatsApp deeplink
+        const wa = `https://wa.me/${phone}?text=${txt}`;
+        window.open(wa, '_blank');
+      } else {
+        alert('SOS prepared. Add a primary contact in Settings for quick share.');
+      }
+    }
+
+    // Impact simulation
+    function simulateImpact(){
+      $('#impact').textContent = 'Impact!';
+      $('.tile:nth-child(1) .muted').textContent = 'SOS will trigger';
+      openSOS();
+      setTimeout(()=>{ $('#impact').textContent = 'Normal'; $('.tile:nth-child(1) .muted').textContent = 'Click to simulate'; }, 4000);
+    }
+
+    // Pairing code generator
+    function generatePairCode(){
+      const code = Math.random().toString(36).slice(2,6).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
+      $('#pairCode').textContent = code;
+    }
+
+    // Battery trickle
+    setInterval(()=>{
+      const el = $('#battery');
+      let v = Math.max(0, parseInt(el.textContent,10) - (Math.random()<0.3?1:0));
+      el.textContent = v;
+    }, 5000);
+
+    // Speed simulation
+    setInterval(randomSpeed, 1000);
+
+    // Interactions
+    $('#rideSwitch').addEventListener('click', ()=> toggleRide());
+    $('#rideSwitch').addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggleRide(); } });
+    $('#startRideBtn').addEventListener('click', ()=> toggleRide());
+
+    $('#impactBtn').addEventListener('click', simulateImpact);
+    $('#impact').closest('.tile').addEventListener('click', simulateImpact);
+
+    $('#sosBtn').addEventListener('click', openSOS);
+    $('#sosMini').addEventListener('click', openSOS);
+
+    $('#settingsBtn').addEventListener('click', ()=> { const s = store.get('settings', {}); const f = $('#settingsForm'); f.rider.value=s.rider||''; f.c1.value=s.c1||''; f.c2.value=s.c2||''; f.lockout.checked=!!s.lockout; $('#settingsDialog').showModal(); });
+    $('#closeSettings').addEventListener('click', ()=> $('#settingsDialog').close());
+    $('#settingsForm').addEventListener('submit', (e)=>{
+      const data = Object.fromEntries(new FormData(e.target)); data.lockout = !!e.target.lockout.checked; store.set('settings', data); $('#settingsDialog').close(); alert('Settings saved');
+    });
+
+    $('#pairBtn').addEventListener('click', generatePairCode);
+
+    // Lock tile toggle
+    $('#lockState').closest('.tile').addEventListener('click', ()=>{
+      const el = $('#lockState'); el.textContent = el.textContent === 'Locked' ? 'Unlocked' : 'Locked';
+    });
+
+    // Init
+    renderTrips();
+    generatePairCode();
+    updateDistance(0);
+  </script>
+</body>
+</html>
